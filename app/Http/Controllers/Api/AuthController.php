@@ -58,7 +58,7 @@ class AuthController extends Controller
         return response([
             'message' => 'Successfully registered user',
             'data' => [
-                'user' => $user,
+                'user' => $user->load('profile'),
                 'shop' => $shop,
                 'token' => $plainTextToken
             ]
@@ -86,7 +86,7 @@ class AuthController extends Controller
         return response([
             'message' => 'Successfully logged in',
             'data' => [
-                'user' => auth()->user(),
+                'user' => $user->load('profile'),
                 'shop' => auth()->user()->shop,
                 'token' => $token
             ]
@@ -99,12 +99,13 @@ class AuthController extends Controller
      */
     public function checkToken(Request $request)
     {
-        $user = auth()->user();
+        $user = User::where('id', auth()->user()->id)->first();
 
         return response([
             'message' => 'Successfully logged in',
             'data' => [
-                'user' => $user,
+                // user wiith profile
+                'user' => $user->load('profile'),
                 'shop' => $user->shop,
             ]
         ]);
