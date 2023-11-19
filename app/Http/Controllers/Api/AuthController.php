@@ -93,6 +93,23 @@ class AuthController extends Controller
         ]);
     }
 
+
+    /**
+     * check token
+     */
+    public function checkToken(Request $request)
+    {
+        $user = auth()->user();
+
+        return response([
+            'message' => 'Successfully logged in',
+            'data' => [
+                'user' => $user,
+                'shop' => $user->shop,
+            ]
+        ]);
+    }
+
     /**
      * Logout an existing user.
      */
