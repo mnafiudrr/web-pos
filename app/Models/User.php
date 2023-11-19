@@ -52,4 +52,12 @@ class User extends Authenticatable
     {
         return $this->hasOne(Profile::class);
     }
+
+    /**
+     * Get the shop associated with the user.
+     */
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class);
+    }
 }
