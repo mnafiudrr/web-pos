@@ -20,8 +20,14 @@ class ProductController extends Controller
             'per_page' => 'nullable|integer',
         ]);
 
-        $products = Product::select('id', 'name', 'description', 'price', 'stock', 'created_by')->where('shop_id', auth()->user()->shop_id)
-            ->where('name', 'ilike', '%' . $validatedData['keyword'] . '%');
+        $products = Product::select('id', 'name', 'description', 'price', 'stock', 'created_by')->where('shop_id', auth()->user()->shop_id);
+
+        // check using DB Postgres or MySQL
+        if (config('database.default') === 'pgsql') {
+            $products->where('name', 'ilike', '%' . $validatedData['keyword'] . '%');
+        } else {
+            $products->where('name', 'like', '%' . $validatedData['keyword'] . '%');
+        }
 
         if (isset($validatedData['category_id'])) {
             $products->whereHas('categories', function ($query) use ($validatedData) {
