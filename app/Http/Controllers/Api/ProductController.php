@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Traits\Upload;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    use Upload;
+
     /**
      * Display a listing of the resource.
      */
@@ -20,7 +23,7 @@ class ProductController extends Controller
             'per_page' => 'nullable|integer',
         ]);
 
-        $products = Product::select('id', 'name', 'description', 'price', 'stock', 'created_by')->where('shop_id', auth()->user()->shop_id);
+        $products = Product::select('id', 'name', 'description', 'price', 'stock', 'image', 'created_by')->where('shop_id', auth()->user()->shop_id);
 
         // check using DB Postgres or MySQL
         if (config('database.default') === 'pgsql') {
@@ -56,11 +59,14 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|unique:products',
+            'name' => 'required|string',
             'description' => 'required|string',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
+            'image' => 'required|image|mimes:jpg,png,jpeg|max:5120',
         ]);
+
+        $validatedData['image'] = $this->UploadFile($validatedData['image'], 'shop/' . auth()->user()->shop->slug);
 
         $product = Product::create($validatedData);
 
@@ -100,12 +106,23 @@ class ProductController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric',
             'stock' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpg,png,jpeg|max:5120',
         ]);
 
         try {
             $product = Product::findOrFail($id);
         } catch (\Throwable $th) {
             return response(['message' => 'Product not found'], 404);
+        }
+
+        if (isset($validatedData['image'])) {
+            $validatedData['image'] = $this->UploadFile($validatedData['image'], 'shop/' . auth()->user()->shop->slug);
+
+            if ($product->image) {
+                $this->DeleteFile($product->getRawOriginal('image'));
+            }
+        } else {
+            unset($validatedData['image']);
         }
 
         $product->update($validatedData);

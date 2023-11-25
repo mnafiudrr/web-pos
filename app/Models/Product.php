@@ -68,4 +68,12 @@ class Product extends Model
         return $value;
         // return number_format($value, 0, ',', '.');
     }
+
+    /**
+     * Get the product's image.
+     */
+    public function getImageAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
 }

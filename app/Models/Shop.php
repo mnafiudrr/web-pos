@@ -33,7 +33,7 @@ class Shop extends Model
         parent::boot();
 
         static::creating(function ($shop) {
-            $shop->slug = strtolower($shop->name) . '-' . $shop->owner;
+            $shop->slug = str_replace(' ', '-', strtolower($shop->name)).'-'.time();
         });
     }
 
